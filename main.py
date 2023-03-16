@@ -51,16 +51,17 @@ def fetch_data_from_autoria():
                                 'count': count,
                             }
                         )
-    to_gspread('py-autoria', pd.DataFrame(autoria_data))
+    return pd.DataFrame(autoria_data)
 
 
-def to_gspread(worksheet_name, dataframe):
+def to_gspread(worksheet_name, dataframe, subset):
     gc = gspread.service_account(filename=os.path.join(CREDENTIALS_PATH, "google_credentials.json"))
     sh = gc.open_by_key(G_SHEET_ID)
     worksheet = sh.worksheet(worksheet_name)
     existing_df = pd.DataFrame(worksheet.get_all_records()).dropna()
     updated = pd.concat([existing_df, dataframe])
     worksheet.clear()
+    updated.drop_duplicates(subset=subset, keep='first', inplace=True, ignore_index=True)
     gspread_dataframe.set_with_dataframe(worksheet, updated)
 
 
@@ -91,9 +92,10 @@ def fetch_data_from_olx():
 
     df = pd.json_normalize(olx_data)
     df['date'] = datetime.today().strftime('%Y-%m-%d')
-    to_gspread('py-olx', df[['date', 'label', 'count']].rename(columns={'label': 'region'}))
+    return df
 
 
 if __name__ == '__main__':
-    fetch_data_from_olx()
-    fetch_data_from_autoria()
+    to_gspread('py-olx', fetch_data_from_olx()[['date', 'label', 'count']]
+               , subset=['date', 'label'])
+    to_gspread('py-autoria', fetch_data_from_autoria(), subset=['date', 'region'])
