@@ -1,7 +1,5 @@
 # AutoRia OLX
 
-<a href="https://lookerstudio.google.com/reporting/e899b21f-1f3a-4a48-aac1-085a2b84f151"><b>Looker Studio
-Link<b/><br><br></a>
 EN
 
 This Python code collects data on car ads from two websites, olx.ua and auto.ria.com, and writes it to a Google
